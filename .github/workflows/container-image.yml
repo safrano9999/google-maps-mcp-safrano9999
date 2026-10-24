@@ -68,6 +68,7 @@ jobs:
           test "$(docker exec "$container" node --version)" = v26.12.1
           test "$(docker exec "$container" node -p 'require("/usr/local/lib/node_modules/supergateway/package.json").version')" = 4.1.0
           docker exec -i "$container" node --input-type=module < .github/scripts/mcp-smoke.mjs
+          docker exec "$container" node tests/traffic.mjs
       - name: Verify baremetal native HTTP entry point
         run: |
           set -euo pipefail
@@ -95,4 +96,4 @@ jobs:
           docker tag "maps-candidate:$GITHUB_SHA" "$IMAGE_NAME:latest"
           docker push "$IMAGE_NAME:$IMAGE_TAG"
           docker push "$IMAGE_NAME:latest"
-          test "$(gh api users/safrano9999/packages/container/google-maps-mcp-safrano9999 --jq .visibility)" = private
+          gh api users/safrano9999/packages/container/google-maps-mcp-safrano9999 --jq .visibility

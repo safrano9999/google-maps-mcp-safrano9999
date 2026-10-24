@@ -6,15 +6,25 @@ The container uses the **original `supercorp/supergateway:4.1.0` image as its ru
 
 ## Configuration
 
-Run `./setup.sh` (or `./config.sh`) to configure the named environment file and deployment settings using the shared default and New/Skip logic. `env.example` defines only `GOOGLE_MAPS_API_KEY`; `container.example` defines the image, optional host publication and repeatable `ADDITIONAL_LINE` Quadlet settings. Leave the published port blank for network-only access, and add `Network=core` as an additional line. Alternatively, copy `env.example` to `.env` and set `GOOGLE_MAPS_API_KEY`. This is the only required setting. Secrets are excluded from Git and never embedded in the image. No database or persistent volume is needed.
+Run `./setup.sh` (or `./config.sh`) to configure the named environment file and deployment settings using the shared default and New/Skip logic. `env.example` defines the required `GOOGLE_MAPS_API_KEY` and optional traffic routing preference; `container.example` defines the image, optional host publication and repeatable `ADDITIONAL_LINE` Quadlet settings. Leave the published port blank for network-only access, and add `Network=core` as an additional line. Alternatively, copy `env.example` to `.env` and set `GOOGLE_MAPS_API_KEY`. This is the only required setting. Secrets are excluded from Git and never embedded in the image. No database or persistent volume is needed.
 
 Enable the Google APIs required by the tools you use in the key's Google Cloud project. Google Cloud billing and API-specific quotas apply. The optional `routes_optimize` tool additionally needs `GOOGLE_CLOUD_PROJECT_ID` and the Route Optimization API; ordinary routing does not need that extra variable.
 
 With the default container name, the shared configurator writes `google-maps-mcp.env`, `google-maps-mcp_config.conf`, `google-maps-mcp_container.conf` and the generated Quadlet/Compose files. For baremetal, load the generated environment using `node --env-file=google-maps-mcp.env dist/index.js`, or use the manual `.env` setup below.
 
+## Traffic-aware routing
+
+`GOOGLE_MAPS_ROUTING_PREFERENCE=TRAFFIC_AWARE_OPTIMAL` is the optional default preset. If unset or empty, the server also uses `TRAFFIC_AWARE_OPTIMAL`. Alternatives are `TRAFFIC_AWARE` and `TRAFFIC_UNAWARE`; other values are rejected at startup.
+
+The preference is sent for driving and two-wheeler routes, and driving route matrices. It is omitted for walking, cycling and transit. With no departure time supplied, Google uses the current time. A future departure time combines live and historical traffic predictions. Responses include `duration` and `staticDuration` to distinguish the traffic-aware ETA from the baseline.
+
+Traffic-aware requests can be billed differently by Google. With `TRAFFIC_AWARE_OPTIMAL`, Google limits a matrix to 100 origin/destination pairs. See [Google's traffic documentation](https://developers.google.com/maps/documentation/routes/config_trade_offs).
+
+The directly hosted Google Maps Grounding Lite MCP does not expose this routing setting; use this fork's `routes_compute` or `routes_matrix` tool for configurable traffic-aware routing.
+
 ## Container
 
-Image: `ghcr.io/safrano9999/google-maps-mcp-safrano9999:latest` (private GHCR package).
+Image: `ghcr.io/safrano9999/google-maps-mcp-safrano9999:latest` (GHCR package).
 
 After the image has been downloaded through Smart1, run it on the internal Podman network:
 

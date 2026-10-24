@@ -2,6 +2,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { computeRoutes, computeRouteMatrix, optimizeTours, parseWaypoint } from '../maps-client.js';
 
+const routingPreference = z.enum([
+  'TRAFFIC_AWARE_OPTIMAL', 'TRAFFIC_AWARE', 'TRAFFIC_UNAWARE',
+]).parse(process.env.GOOGLE_MAPS_ROUTING_PREFERENCE || 'TRAFFIC_AWARE_OPTIMAL');
+
 export function registerRoutesTools(server: McpServer): void {
 
   // ── Compute Routes ─────────────────────────────────────────────────────────
@@ -79,6 +83,10 @@ export function registerRoutesTools(server: McpServer): void {
           languageCode: language_code,
         };
 
+        if (travel_mode === 'DRIVE' || travel_mode === 'TWO_WHEELER') {
+          body.routingPreference = routingPreference;
+        }
+
         if (intermediates && intermediates.length > 0) {
           body.intermediates = intermediates.map(parseWaypoint);
         }
@@ -94,6 +102,7 @@ export function registerRoutesTools(server: McpServer): void {
 
         const fieldMask = [
           'routes.duration',
+          'routes.staticDuration',
           'routes.distanceMeters',
           'routes.description',
           'routes.legs',
@@ -138,9 +147,10 @@ export function registerRoutesTools(server: McpServer): void {
           units,
           languageCode: language_code,
         };
+        if (travel_mode === 'DRIVE') body.routingPreference = routingPreference;
         if (departure_time) body.departureTime = departure_time;
 
-        const fieldMask = 'originIndex,destinationIndex,duration,distanceMeters,status,condition';
+        const fieldMask = 'originIndex,destinationIndex,duration,staticDuration,distanceMeters,status,condition';
 
         const data = await computeRouteMatrix(body, fieldMask);
         return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }] };
