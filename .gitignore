@@ -2,3 +2,15 @@ node_modules/
 dist/
 .claude/
 CLAUDE.md
+
+.env
+.env.*
+*.env
+config.conf
+container.conf
+build.conf
+docker-compose.yml
+*.container
+*_config.conf
+*_container.conf
+*-compose.yml

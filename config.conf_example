@@ -1,0 +1,2 @@
+# No additional runtime settings are required.
+# The Google key belongs in the environment file; deployment options in the container configuration.

@@ -153,7 +153,7 @@ server.on('clientError', (err, socket) => {
   }
 });
 
-const PORT = parseInt(process.env.PORT ?? '3003', 10);
+const PORT = 8000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`google-maps-mcp listening on port ${PORT}`);
   console.log(`  Health: http://localhost:${PORT}/health`);

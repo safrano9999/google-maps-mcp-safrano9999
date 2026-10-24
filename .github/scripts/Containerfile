@@ -1,0 +1,37 @@
+# syntax=docker/dockerfile:1.7
+# Source of truth: SCRIPTS/githubactions. Generated copies are overwritten.
+FROM docker.io/library/node:26.12.1-alpine@sha256:40cd011b55415bc894e45b02fdd5a5dfde056921b7d23a64c74f80497af48797 AS node-runtime
+FROM node-runtime AS maps-build
+ARG MCP_REVISION
+RUN apk add --no-cache git
+WORKDIR /opt/google-maps-mcp
+RUN test -n "$MCP_REVISION" \
+    && git clone --depth 1 --single-branch https://github.com/safrano9999/google-maps-mcp-safrano9999.git . \
+    && git fetch --depth 1 origin "$MCP_REVISION" \
+    && git checkout --detach FETCH_HEAD \
+    && test "$(git rev-parse HEAD)" = "$MCP_REVISION" \
+    && npm ci --ignore-scripts --no-audit --no-fund \
+    && npm run build \
+    && npm prune --omit=dev --ignore-scripts --no-audit --no-fund \
+    && rm -rf .git
+
+FROM docker.io/supercorp/supergateway:4.1.0@sha256:1938c43538a5308bce07d58028e9de00b7acfecb40b39b059b2f3931800ad910
+USER root
+RUN apk upgrade --no-cache && apk add --no-cache libatomic \
+    && rm -rf /usr/local/lib/node_modules/npm
+COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
+COPY --from=node-runtime /usr/local/lib/node_modules/npm/ /usr/local/lib/node_modules/npm/
+COPY --from=maps-build /opt/google-maps-mcp/ /opt/google-maps-mcp/
+ENV NODE_ENV=production
+WORKDIR /opt/google-maps-mcp
+LABEL org.opencontainers.image.title="Google Maps MCP" \
+      org.opencontainers.image.source="https://github.com/safrano9999/google-maps-mcp-safrano9999" \
+      org.opencontainers.image.licenses="GPL-3.0-only" \
+      io.safrano9999.nodejs.version="26.12.1" \
+      io.safrano9999.supergateway.version="4.1.0"
+USER node
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+    CMD node -e 'fetch("http://127.0.0.1:8000/health", {signal: AbortSignal.timeout(4000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'
+ENTRYPOINT ["supergateway"]
+CMD ["--stdio", "node /opt/google-maps-mcp/dist/stdio.js", "--outputTransport", "streamableHttp", "--stateful", "--sessionTimeout", "1800000", "--port", "8000", "--streamableHttpPath", "/mcp", "--healthEndpoint", "/health", "--logLevel", "info"]

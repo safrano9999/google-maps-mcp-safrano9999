@@ -1,0 +1,18 @@
+#CONTAINER-NAME
+CONTAINER_NAME=google-maps-mcp
+
+#container-command: image
+IMAGE=ghcr.io/safrano9999/google-maps-mcp-safrano9999:latest
+
+#default-preset: 127.0.0.1
+GOOGLE_MAPS_MCP_PUBLISH_HOST=127.0.0.1
+
+# Leave empty for Podman-network-only access. Internal MCP port is always 8000.
+#container-port: GOOGLE_MAPS_MCP_PUBLISH_PORT 8000
+GOOGLE_MAPS_MCP_PUBLISH_PORT=
+
+# Additional Quadlet settings, e.g. Network=core.
+#repeat-group: ADDITIONAL_LINE suffix02 ADDITIONAL_LINE
+#repeat-freeform: ADDITIONAL_LINE
+ADDITIONAL_LINE=Pull=never
+ADDITIONAL_LINE_02=

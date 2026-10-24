@@ -1,7 +1,7 @@
 {
   "name": "mcp-server-google-maps",
   "version": "1.0.4",
-  "description": "MCP Server for Google Maps — 15 tools covering Places, Routes, Static Maps, Street View, Geocoding, Timezone, Address Validation and more.",
+  "description": "MCP Server for Google Maps \u2014 15 tools covering Places, Routes, Static Maps, Street View, Geocoding, Timezone, Address Validation and more.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -12,9 +12,10 @@
   ],
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node --env-file-if-exists=.env dist/index.js",
     "dev": "tsc --watch",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "start:stdio": "node --env-file-if-exists=.env dist/stdio.js"
   },
   "keywords": [
     "mcp",
@@ -31,9 +32,9 @@
   "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/apurvaumredkar/google-maps-mcp.git"
+    "url": "https://github.com/safrano9999/google-maps-mcp-safrano9999.git"
   },
-  "homepage": "https://github.com/apurvaumredkar/google-maps-mcp#readme",
+  "homepage": "https://github.com/safrano9999/google-maps-mcp-safrano9999#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.0",
     "zod": "^3.24.0"
@@ -42,5 +43,8 @@
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0",
     "vitest": "^4.1.3"
+  },
+  "engines": {
+    "node": ">=26.12.1"
   }
 }
